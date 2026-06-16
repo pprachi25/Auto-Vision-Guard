@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sound Test</title>
+<style>
+  body { background: #0d1117; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; margin: 0; }
+  button { padding: 14px 32px; font-size: 16px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; width: 280px; }
+  .b1 { background: #ff3b3b; color: #fff; }
+  .b2 { background: #ffa040; color: #000; }
+  .b3 { background: #00aaff; color: #000; }
+  .b4 { background: #00e676; color: #000; }
+  #status { margin-top: 20px; font-size: 14px; color: #888; }
+</style>
+</head>
+<body>
+<h2>🔊 AutoVision Sound Test</h2>
+<p style="color:#aaa;font-size:13px">Pehle koi bhi ek button click karo</p>
+
+<button class="b1" onclick="siren()">🚨 High-Risk Movement</button>
+<button class="b2" onclick="pedestrian()">⚠️ Pedestrian Alert</button>
+<button class="b3" onclick="congestion()">🚗 Traffic Congestion</button>
+<button class="b4" onclick="systemOk()">✅ System OK</button>
+
+<div id="status">Ready</div>
+
+<script>
+var AC = null;
+
+function getAC() {
+  if (!AC) AC = new AudioContext();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+function tone(freq, start, dur, vol, type) {
+  var ctx = getAC();
+  var o = ctx.createOscillator();
+  var g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type = type || 'sine';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0, ctx.currentTime + start);
+  g.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+  o.start(ctx.currentTime + start);
+  o.stop(ctx.currentTime + start + dur + 0.05);
+  document.getElementById('status').textContent = 'Playing...';
+}
+
+function siren() {
+  tone(1000, 0.0, 0.25, 0.6, 'sawtooth');
+  tone(600,  0.3, 0.25, 0.6, 'sawtooth');
+  tone(1000, 0.6, 0.25, 0.6, 'sawtooth');
+  tone(600,  0.9, 0.25, 0.6, 'sawtooth');
+}
+
+function pedestrian() {
+  tone(880, 0.0, 0.18, 0.5, 'sine');
+  tone(880, 0.25, 0.18, 0.5, 'sine');
+  tone(880, 0.5, 0.18, 0.5, 'sine');
+}
+
+function congestion() {
+  tone(300, 0.0, 0.5, 0.6, 'triangle');
+  tone(300, 0.7, 0.5, 0.6, 'triangle');
+}
+
+function systemOk() {
+  tone(520, 0.0, 0.25, 0.3, 'sine');
+  tone(660, 0.2, 0.25, 0.3, 'sine');
+  tone(800, 0.4, 0.25, 0.3, 'sine');
+}
+</script>
+</body>
+</html>

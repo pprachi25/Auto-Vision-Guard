@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoVision Guard — Pro AI Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- ══════════════════════════ SIDEBAR ══════════════════════════════════════ -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🛡️</div>
+        <div>
+            <div class="logo-text">AutoVision</div>
+            <div class="logo-sub">GUARD AI</div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-section-title">Navigation</div>
+        <ul>
+            <li><a href="#dashboard" class="nav-link active">
+                <span class="nav-icon">📊</span> Dashboard
+            </a></li>
+            <li><a href="#alerts" class="nav-link">
+                <span class="nav-icon">🔔</span> AI Alerts
+                <span class="nav-badge">4</span>
+            </a></li>
+        </ul>
+        <div class="nav-section-title">Detection</div>
+        <ul>
+            <li><a href="#live" class="nav-link">
+                <span class="nav-icon">📷</span> Live Camera
+            </a></li>
+            <li><a href="#image" class="nav-link">
+                <span class="nav-icon">🖼️</span> Image Analysis
+            </a></li>
+            <li><a href="#video" class="nav-link">
+                <span class="nav-icon">🎬</span> Video Analysis
+            </a></li>
+        </ul>
+        <div class="nav-section-title">Analytics</div>
+        <ul>
+            <li><a href="#analytics-deep" class="nav-link">
+                <span class="nav-icon">📈</span> Traffic Charts
+            </a></li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="system-health">
+            <div class="health-title">SYSTEM HEALTH</div>
+            <div class="health-row">
+                <span class="health-label">CPU</span>
+                <div class="health-bar-wrap"><div class="health-bar" style="width:42%;background:#00d4ff"></div></div>
+                <span class="health-val">42%</span>
+            </div>
+            <div class="health-row">
+                <span class="health-label">GPU</span>
+                <div class="health-bar-wrap"><div class="health-bar" style="width:68%;background:#7c3aed"></div></div>
+                <span class="health-val">68%</span>
+            </div>
+            <div class="health-row">
+                <span class="health-label">RAM</span>
+                <div class="health-bar-wrap"><div class="health-bar" style="width:55%;background:#00e676"></div></div>
+                <span class="health-val">55%</span>
+            </div>
+        </div>
+        <span class="version-badge">YOLOv8n · v2.0 Pro</span>
+    </div>
+</div>
+
+<!-- ══════════════════════════ MAIN ════════════════════════════════════════ -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1>AutoVision Guard</h1>
+            <p>Real-time Traffic Intelligence & Safety Monitoring</p>
+        </div>
+        <div class="topbar-right">
+            <span class="status-badge">
+                <span class="pulse-dot"></span>
+                AI SYSTEM ACTIVE
+            </span>
+            <!-- Sound must be enabled by user gesture (browser policy) -->
+            <button id="soundEnableBtn" onclick="enableSoundSystem()" style="
+                padding: 6px 14px;
+                background: linear-gradient(135deg,#ff6b00,#ffa040);
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                animation: pulse-btn 1.5s infinite;
+            ">🔕 ENABLE ALERTS</button>
+            <span class="time-display" id="clockDisplay">--:--:--</span>
+        </div>
+    </div>
+
+    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <section id="dashboard" class="section-block">
+        <div class="section-header">
+            <h2>Dashboard Overview</h2>
+            <span class="section-meta">Updated {{ analytics.fps }} FPS</span>
+        </div>
+
+        <div class="stat-grid">
+            <!-- Vehicles -->
+            <div class="stat-card blue">
+                <div class="stat-header">
+                    <span class="stat-label">Total Vehicles</span>
+                    <span class="stat-icon blue">🚗</span>
+                </div>
+                <div class="stat-value" id="statVehicles">{{ analytics.vehicles }}</div>
+                <div class="stat-footer">
+                    <span class="stat-change up">↑ Detected</span>
+                    <span class="stat-trend">Session</span>
+                </div>
+                <div class="sparkline-wrap" id="sparkVehicles">
+                    <div class="spark-bar" style="height:30%"></div>
+                    <div class="spark-bar" style="height:55%"></div>
+                    <div class="spark-bar" style="height:40%"></div>
+                    <div class="spark-bar" style="height:70%"></div>
+                    <div class="spark-bar" style="height:50%"></div>
+                    <div class="spark-bar" style="height:90%"></div>
+                    <div class="spark-bar" style="height:75%"></div>
+                </div>
+            </div>
+
+            <!-- Pedestrians -->
+            <div class="stat-card purple">
+                <div class="stat-header">
+                    <span class="stat-label">Pedestrians</span>
+                    <span class="stat-icon purple">🚶</span>
+                </div>
+                <div class="stat-value" id="statPedestrians">{{ analytics.pedestrians }}</div>
+                <div class="stat-footer">
+                    <span class="stat-change up">↑ Detected</span>
+                    <span class="stat-trend">Session</span>
+                </div>
+                <div class="sparkline-wrap">
+                    <div class="spark-bar" style="height:20%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:40%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:35%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:60%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:45%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:80%;background:#7c3aed"></div>
+                    <div class="spark-bar" style="height:65%;background:#7c3aed"></div>
+                </div>
+            </div>
+
+            <!-- Risk Level -->
+            <div class="stat-card {% if analytics.risk == 'HIGH' %}red{% elif analytics.risk == 'MEDIUM' %}orange{% else %}green{% endif %}">
+                <div class="stat-header">
+                    <span class="stat-label">Risk Level</span>
+                    <span class="stat-icon {% if analytics.risk == 'HIGH' %}red{% elif analytics.risk == 'MEDIUM' %}orange{% else %}green{% endif %}">⚠️</span>
+                </div>
+                <div class="stat-value" style="font-size:20px;margin-top:6px;">{{ analytics.risk }}</div>
+                <div class="stat-footer" style="margin-top:10px;">
+                    <span class="risk-indicator risk-{{ analytics.risk|lower }}">● {{ analytics.risk }}</span>
+                </div>
+            </div>
+
+            <!-- Traffic -->
+            <div class="stat-card orange">
+                <div class="stat-header">
+                    <span class="stat-label">Traffic Flow</span>
+                    <span class="stat-icon orange">🚦</span>
+                </div>
+                <div class="stat-value" style="font-size:18px;margin-top:6px;">{{ analytics.traffic }}</div>
+                <div class="stat-footer" style="margin-top:10px;">
+                    <span class="tag {% if analytics.traffic == 'HEAVY' %}tag-red{% elif analytics.traffic == 'MODERATE' %}tag-orange{% else %}tag-green{% endif %}">
+                        {{ analytics.traffic }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- FPS -->
+            <div class="stat-card teal">
+                <div class="stat-header">
+                    <span class="stat-label">Processing FPS</span>
+                    <span class="stat-icon teal">⚡</span>
+                </div>
+                <div class="stat-value">{{ analytics.fps }}</div>
+                <div class="stat-footer">
+                    <span class="stat-change up">● Real-time</span>
+                    <span class="stat-trend">Live</span>
+                </div>
+            </div>
+
+            <!-- Accuracy -->
+            <div class="stat-card green">
+                <div class="stat-header">
+                    <span class="stat-label">Model Accuracy</span>
+                    <span class="stat-icon green">🎯</span>
+                </div>
+                <div class="stat-value">{{ analytics.accuracy }}%</div>
+                <div class="stat-footer">
+                    <span class="stat-change up">YOLOv8n</span>
+                    <span class="stat-trend">Model</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detection Breakdown (if available) -->
+        {% if analytics.class_counts and analytics.class_counts.keys()|list|length > 0 %}
+        <div class="chart-card mt-16">
+            <div class="chart-title">Detection Breakdown</div>
+            <div class="chart-subtitle">Objects detected in this session by class</div>
+            <div class="class-table-wrap">
+                <table class="class-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Count</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cls, cnt in analytics.class_counts.items() %}
+                        <tr>
+                            <td><span class="cls-chip">{{ cls }}</span></td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text-primary)">{{ cnt }}</td>
+                            <td>
+                                {% if cls in ['car','truck','bus','motorcycle','bicycle'] %}
+                                <span class="tag tag-blue">Vehicle</span>
+                                {% elif cls == 'person' %}
+                                <span class="tag tag-purple">Pedestrian</span>
+                                {% else %}
+                                <span class="tag tag-orange">Object</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if class_breakdown %}
+        <div class="chart-card mt-16">
+            <div class="chart-title">Per-Class Detection Analysis</div>
+            <div class="chart-subtitle">Detailed breakdown with confidence scores</div>
+            <div class="class-table-wrap">
+                <table class="class-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Count</th>
+                            <th>Avg Confidence</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in class_breakdown %}
+                        <tr>
+                            <td><span class="cls-chip">{{ item.name }}</span></td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text-primary)">{{ item.count }}</td>
+                            <td>
+                                <span class="conf-bar-wrap">
+                                    <span class="conf-bar" style="width:{{ item.avg_conf }}%"></span>
+                                </span>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{ item.avg_conf }}%</span>
+                            </td>
+                            <td>
+                                {% if item.name in ['car','truck','bus','motorcycle','bicycle'] %}
+                                <span class="tag tag-blue">Vehicle</span>
+                                {% elif item.name == 'person' %}
+                                <span class="tag tag-purple">Pedestrian</span>
+                                {% else %}
+                                <span class="tag tag-orange">Object</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ══════════════ ALERTS ══════════════ -->
+    <section id="alerts" class="section-block">
+        <div class="section-header">
+            <h2>AI Safety Alerts</h2>
+            <span class="alert-count">4 Active</span>
+            <button onclick="testAllAlertSounds()" style="margin-left:auto;padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">🔊 Test Sounds</button>
+        </div>
+        <div class="alert-list">
+            <div class="alert-box alert-danger" onclick="unlockAudio(); triggerAlert({level:'HIGH', source:'Demo', vehicles:3, pedestrians:2, alertType:'HIGH_RISK'})" style="cursor:pointer" title="Click to test sound">
+                <span class="alert-icon">🚨</span>
+                <div>
+                    <strong>High-Risk Movement Detected</strong>
+                    <p>Anomalous trajectory detected — possible lane violation on primary route</p>
+                </div>
+                <span class="alert-time">Just now</span>
+            </div>
+            <div class="alert-box alert-warning" onclick="unlockAudio(); triggerAlert({level:'MEDIUM', source:'Demo2', vehicles:0, pedestrians:2, alertType:'PEDESTRIAN'})" style="cursor:pointer" title="Click to test sound">
+                <span class="alert-icon">⚠️</span>
+                <div>
+                    <strong>Pedestrian Near Crossing Zone</strong>
+                    <p>Pedestrian detected within high-risk crossing area — reduce speed advised</p>
+                </div>
+                <span class="alert-time">2 min ago</span>
+            </div>
+            <div class="alert-box alert-warning" onclick="unlockAudio(); triggerAlert({level:'MEDIUM', source:'Demo3', vehicles:7, pedestrians:0, alertType:'CONGESTION'})" style="cursor:pointer" title="Click to test sound">
+                <span class="alert-icon">🚗</span>
+                <div>
+                    <strong>Heavy Traffic Congestion</strong>
+                    <p>Dense vehicle clustering on segment B-7 — recommend rerouting</p>
+                </div>
+                <span class="alert-time">5 min ago</span>
+            </div>
+            <div class="alert-box alert-success" onclick="unlockAudio(); playAlertSound('OK','SYSTEM_OK')" style="cursor:pointer" title="Click to test sound">
+                <span class="alert-icon">✅</span>
+                <div>
+                    <strong>All Detection Modules Operational</strong>
+                    <p>YOLOv8 model healthy — no system faults detected</p>
+                </div>
+                <span class="alert-time">Ongoing</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ ANALYTICS CHARTS ══════════════ -->
+    <section id="analytics-deep" class="section-block">
+        <div class="section-header">
+            <h2>Traffic Analytics</h2>
+            <span class="section-meta" id="chartUpdateTime">Hourly data</span>
+        </div>
+
+        <div class="chart-grid">
+            <!-- Main line chart -->
+            <div class="chart-card">
+                <div class="chart-title">Hourly Traffic Flow</div>
+                <div class="chart-subtitle">Vehicles & pedestrians over time</div>
+                <div class="chart-wrap">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Donut chart -->
+            <div class="chart-card">
+                <div class="chart-title">Detection Distribution</div>
+                <div class="chart-subtitle">By object category</div>
+                <div class="chart-wrap-sm">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 0;">
+            <!-- Risk bar chart -->
+            <div class="chart-card">
+                <div class="chart-title">Risk Level History</div>
+                <div class="chart-subtitle">Score by hour</div>
+                <div class="chart-wrap-sm">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Speed/FPS line -->
+            <div class="chart-card">
+                <div class="chart-title">Processing Performance</div>
+                <div class="chart-subtitle">FPS & accuracy over time</div>
+                <div class="chart-wrap-sm">
+                    <canvas id="perfChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Traffic type stacked -->
+            <div class="chart-card">
+                <div class="chart-title">Vehicle Type Split</div>
+                <div class="chart-subtitle">Cars, trucks, bikes</div>
+                <div class="chart-wrap-sm">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {% if chart_data %}
+        <!-- Video frame-by-frame chart -->
+        <div class="chart-card mt-16">
+            <div class="chart-title">Video Analysis — Frame Timeline</div>
+            <div class="chart-subtitle">Detection count per frame throughout video</div>
+            <div class="chart-wrap">
+                <canvas id="videoFrameChart"></canvas>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ══════════════ LIVE CAMERA ══════════════ -->
+    <section id="live" class="section-block">
+        <div class="section-header">
+            <h2>Live AI Monitoring</h2>
+        </div>
+
+        <div class="camera-panel">
+            <div class="camera-controls">
+                <button id="btnStart" class="btn btn-primary" onclick="startCamera()">
+                    ▶ Start Camera
+                </button>
+                <button id="btnStop" class="btn btn-danger" onclick="stopCamera()" disabled>
+                    ■ Stop
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="resetSession()">
+                    ↺ Reset Session
+                </button>
+                <span class="camera-status" id="cameraStatus">● Offline</span>
+            </div>
+
+            <div class="camera-body">
+                <div id="cameraContainer" style="display:none; position:relative;">
+                    <img id="camera-feed" class="live-video" alt="Live detection">
+                    <div class="camera-overlay">
+                        <span class="live-badge" id="liveBadge">● LIVE</span>
+                    </div>
+                    <div class="scan-line" id="scanLine"></div>
+                </div>
+                <div class="camera-hint" id="cameraHint">
+                    <span class="camera-hint-icon">📷</span>
+                    Click <strong>Start Camera</strong> to begin real-time YOLOv8 detection
+                </div>
+            </div>
+
+            <div class="live-stats-bar">
+                <div class="live-stat">
+                    <span class="live-stat-label">Vehicles</span>
+                    <span class="live-stat-value" id="liveVehicles">—</span>
+                </div>
+                <div class="live-stat">
+                    <span class="live-stat-label">Pedestrians</span>
+                    <span class="live-stat-value" id="livePedestrians" style="color:var(--accent-2)">—</span>
+                </div>
+                <div class="live-stat">
+                    <span class="live-stat-label">Risk</span>
+                    <span class="live-stat-value" id="liveRisk" style="color:var(--warning)">—</span>
+                </div>
+                <div class="live-stat">
+                    <span class="live-stat-label">Frames</span>
+                    <span class="live-stat-value" id="liveFrames" style="color:var(--success)">—</span>
+                </div>
+                <div class="live-mini-chart">
+                    <canvas id="liveChart" height="42"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════════ IMAGE DETECTION ══════════════ -->
+    <section id="image" class="section-block">
+        <div class="section-header">
+            <h2>Image Detection</h2>
+            {% if image_result %}
+            <span class="section-meta">✅ Analysis Complete</span>
+            {% endif %}
+        </div>
+
+        <div class="detection-panel">
+            <div class="upload-area">
+                <form action="/detect_image" method="POST" enctype="multipart/form-data">
+                    <div class="file-drop" id="imgDrop">
+                        <div class="file-drop-icon">🖼️</div>
+                        <div class="file-drop-text">Drop image here or click to browse</div>
+                        <div class="file-drop-sub">Supports JPG, PNG, WEBP</div>
+                        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required
+                               onchange="handleFileSelect(this,'imgDrop','imgFilename')">
+                    </div>
+                    <div class="upload-actions">
+                        <div class="selected-file" id="imgFilenameWrap" style="display:none;">
+                            <span>📄</span>
+                            <span id="imgFilename"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Analyze Image
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {% if image_result %}
+            <div class="result-wrap">
+                <div class="result-header">
+                    <span class="result-badge">✅ Detection Complete — {{ analytics.total_detections }} objects found</span>
+                    <a href="{{ image_result }}" download class="btn btn-outline btn-sm">⬇ Download</a>
+                </div>
+                <img src="{{ image_result }}" class="result-image" alt="Detection result">
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ══════════════ VIDEO DETECTION ══════════════ -->
+    <section id="video" class="section-block">
+        <div class="section-header">
+            <h2>Video Detection</h2>
+            {% if video_result %}
+            <span class="section-meta">✅ Processing Complete</span>
+            {% endif %}
+        </div>
+
+        <div class="detection-panel">
+            <div class="upload-area">
+                <!-- Drop / pick zone -->
+                <div class="file-drop" id="vidDrop" onclick="document.getElementById('vidFileInput').click()">
+                    <div class="file-drop-icon">🎬</div>
+                    <div class="file-drop-text">Drop video here or click to browse</div>
+                    <div class="file-drop-sub">Supports MP4, AVI, MOV — any size</div>
+                    <input type="file" id="vidFileInput" name="video" accept=".mp4,.avi,.mov"
+                           style="display:none" onchange="onVideoSelected(this)">
+                </div>
+
+                <!-- Instant local preview (shown as soon as file picked) -->
+                <div id="vidLocalPreview" style="display:none; margin-top:1rem;">
+                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.4rem;">📺 Preview — <span id="vidPreviewName"></span></p>
+                    <video id="vidPreviewEl" controls style="width:100%;border-radius:8px;max-height:260px;background:#000;"></video>
+                </div>
+
+                <!-- Upload + process progress -->
+                <div id="vidProgressWrap" style="display:none; margin-top:1rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--text-muted);margin-bottom:.3rem;">
+                        <span id="vidProgressLabel">Uploading…</span>
+                        <span id="vidProgressPct">0%</span>
+                    </div>
+                    <div style="background:rgba(255,255,255,.08);border-radius:999px;height:8px;overflow:hidden;">
+                        <div id="vidProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .3s ease;"></div>
+                    </div>
+                    <p id="vidProgressSub" style="font-size:.75rem;color:var(--text-muted);margin-top:.4rem;">Please wait…</p>
+                </div>
+
+                <div class="upload-actions" id="vidActions">
+                    <div class="selected-file" id="vidFilenameWrap" style="display:none;">
+                        <span>🎞️</span>
+                        <span id="vidFilename"></span>
+                    </div>
+                    <button class="btn btn-primary" id="videoBtnSubmit" onclick="startVideoUpload()" disabled>
+                        🎬 Analyze Video
+                    </button>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="result-wrap">
+                <div class="alert-box alert-danger">
+                    <span class="alert-icon">❌</span>
+                    <div><strong>Processing Error</strong><p>{{ error }}</p></div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if video_result %}
+            <div class="result-wrap">
+                <div class="result-header">
+                    <span class="result-badge">✅ Detection Complete</span>
+                    <a href="{{ video_result }}" download class="btn btn-outline btn-sm">⬇ Download</a>
+                </div>
+
+                {% if video_analytics %}
+                <div class="video-stat-row">
+                    <div class="video-stat-box">
+                        <div class="vsb-label">Avg Vehicles/Frame</div>
+                        <div class="vsb-value" style="color:var(--accent)">{{ video_analytics.vehicles }}</div>
+                    </div>
+                    <div class="video-stat-box">
+                        <div class="vsb-label">Peak Vehicles</div>
+                        <div class="vsb-value" style="color:var(--warning)">{{ video_analytics.peak_vehicles }}</div>
+                    </div>
+                    <div class="video-stat-box">
+                        <div class="vsb-label">Total Frames</div>
+                        <div class="vsb-value" style="color:var(--success)">{{ video_analytics.total_frames }}</div>
+                    </div>
+                    <div class="video-stat-box">
+                        <div class="vsb-label">Duration</div>
+                        <div class="vsb-value" style="color:var(--accent-2)">{{ video_analytics.duration }}s</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <video class="result-video" controls>
+                    <source src="{{ video_result }}" type="video/mp4">
+                </video>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div> <!-- /main -->
+
+<!-- ══════════════ SCRIPTS ══════════════════════════════════════════════════ -->
+<script>
+// ── Clock ──────────────────────────────────────────────────────────────────
+function updateClock() {
+    const el = document.getElementById('clockDisplay');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-IN', { hour12: false });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── Active nav ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
+// ── File select ────────────────────────────────────────────────────────────
+function handleFileSelect(input, dropId, nameId) {
+    if (!input.files.length) return;
+    const name = input.files[0].name;
+    document.getElementById(nameId).textContent = name;
+    const wrap = document.getElementById(nameId + 'Wrap') || document.getElementById(dropId + '-wrap');
+    // show filename wrapper
+    const wrapEl = dropId === 'imgDrop' ? document.getElementById('imgFilenameWrap') : document.getElementById('vidFilenameWrap');
+    if (wrapEl) wrapEl.style.display = 'flex';
+}
+
+// ── Video async upload ─────────────────────────────────────────────────────
+let _vidFile = null;
+
+function onVideoSelected(input) {
+    if (!input.files.length) return;
+    _vidFile = input.files[0];
+    const name = _vidFile.name;
+
+    // Show filename
+    document.getElementById('vidFilename').textContent = name;
+    document.getElementById('vidFilenameWrap').style.display = 'flex';
+
+    // Instant local preview
+    const previewEl = document.getElementById('vidPreviewEl');
+    previewEl.src = URL.createObjectURL(_vidFile);
+    previewEl.load();
+    document.getElementById('vidPreviewName').textContent = name;
+    document.getElementById('vidLocalPreview').style.display = 'block';
+
+    // Enable analyze button
+    document.getElementById('videoBtnSubmit').disabled = false;
+
+    // Update drop zone text
+    document.querySelector('#vidDrop .file-drop-text').textContent = name;
+}
+
+// Drag-and-drop support
+const vidDropEl = document.getElementById('vidDrop');
+if (vidDropEl) {
+    vidDropEl.addEventListener('dragover', e => { e.preventDefault(); vidDropEl.style.borderColor = 'var(--accent)'; });
+    vidDropEl.addEventListener('dragleave', () => { vidDropEl.style.borderColor = ''; });
+    vidDropEl.addEventListener('drop', e => {
+        e.preventDefault();
+        vidDropEl.style.borderColor = '';
+        const dt = e.dataTransfer;
+        if (dt.files.length) {
+            const fakeInput = { files: dt.files };
+            onVideoSelected(fakeInput);
+        }
+    });
+}
+
+function startVideoUpload() {
+    if (!_vidFile) return;
+
+    const btn = document.getElementById('videoBtnSubmit');
+    btn.disabled = true;
+    btn.textContent = '⏳ Uploading…';
+
+    document.getElementById('vidActions').style.display = 'none';
+    document.getElementById('vidProgressWrap').style.display = 'block';
+    setProgress(0, 'Uploading video…', 'Large files may take a moment to upload…');
+
+    const formData = new FormData();
+    formData.append('video', _vidFile);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/detect_video_async', true);
+
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 50); // upload = 0–50%
+            setProgress(pct, 'Uploading…', `${formatBytes(e.loaded)} / ${formatBytes(e.total)}`);
+        }
+    };
+
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            const resp = JSON.parse(xhr.responseText);
+            if (resp.job_id) {
+                setProgress(50, 'Processing with YOLOv8…', 'Frame-by-frame detection running…');
+                pollJob(resp.job_id);
+            } else {
+                showVideoError(resp.error || 'Upload failed');
+            }
+        } else {
+            showVideoError('Server error: ' + xhr.status);
+        }
+    };
+
+    xhr.onerror = function() {
+        showVideoError('Network error during upload.');
+    };
+
+    xhr.send(formData);
+}
+
+function pollJob(jobId) {
+    const interval = setInterval(() => {
+        fetch('/api/video_job/' + jobId)
+            .then(r => r.json())
+            .then(job => {
+                if (job.status === 'processing') {
+                    // processing progress: 50–99%
+                    const pct = 50 + Math.round(job.progress / 2);
+                    setProgress(pct, 'YOLOv8 detecting objects…', `${job.progress}% frames processed`);
+                } else if (job.status === 'done') {
+                    clearInterval(interval);
+                    setProgress(100, 'Detection complete!', 'Loading results…');
+                    setTimeout(() => showVideoResult(job), 500);
+                } else if (job.status === 'error') {
+                    clearInterval(interval);
+                    showVideoError(job.error || 'Processing failed');
+                }
+            })
+            .catch(() => {/* keep polling */});
+    }, 1200);
+}
+
+function setProgress(pct, label, sub) {
+    document.getElementById('vidProgressBar').style.width = pct + '%';
+    document.getElementById('vidProgressPct').textContent = pct + '%';
+    document.getElementById('vidProgressLabel').textContent = label;
+    document.getElementById('vidProgressSub').textContent = sub;
+}
+
+function formatBytes(bytes) {
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function showVideoError(msg) {
+    document.getElementById('vidProgressWrap').style.display = 'none';
+    document.getElementById('vidActions').style.display = 'flex';
+    document.getElementById('videoBtnSubmit').disabled = false;
+    document.getElementById('videoBtnSubmit').textContent = '🎬 Analyze Video';
+    // Insert error message
+    let errDiv = document.getElementById('vidErrorBox');
+    if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'vidErrorBox';
+        errDiv.className = 'result-wrap';
+        document.querySelector('#video .detection-panel').appendChild(errDiv);
+    }
+    errDiv.innerHTML = `<div class="alert-box alert-danger"><span class="alert-icon">❌</span><div><strong>Processing Error</strong><p>${msg}</p></div></div>`;
+}
+
+function showVideoResult(job) {
+    // Build result HTML dynamically and inject
+    const panel = document.querySelector('#video .detection-panel');
+
+    // Remove old result if any
+    const old = panel.querySelector('.result-wrap');
+    if (old) old.remove();
+
+    const va = job.video_analytics || {};
+    const cb = job.class_breakdown || [];
+
+    const cbHtml = cb.map(c =>
+        `<div class="video-stat-box"><div class="vsb-label">${c.name}</div><div class="vsb-value" style="color:var(--accent)">${c.count}</div></div>`
+    ).join('');
+
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'result-wrap';
+    resultDiv.innerHTML = `
+        <div class="result-header">
+            <span class="result-badge">✅ Detection Complete</span>
+            <a href="${job.video_result}" download class="btn btn-outline btn-sm">⬇ Download</a>
+        </div>
+        <div class="video-stat-row">
+            <div class="video-stat-box"><div class="vsb-label">Avg Vehicles/Frame</div><div class="vsb-value" style="color:var(--accent)">${va.vehicles}</div></div>
+            <div class="video-stat-box"><div class="vsb-label">Peak Vehicles</div><div class="vsb-value" style="color:var(--warning)">${va.peak_vehicles}</div></div>
+            <div class="video-stat-box"><div class="vsb-label">Total Frames</div><div class="vsb-value" style="color:var(--success)">${va.total_frames}</div></div>
+            <div class="video-stat-box"><div class="vsb-label">Duration</div><div class="vsb-value" style="color:var(--accent-2)">${va.duration}s</div></div>
+            ${cbHtml}
+        </div>
+        <video class="result-video" controls autoplay>
+            <source src="${job.video_result}" type="video/mp4">
+        </video>`;
+
+    panel.appendChild(resultDiv);
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Hide progress bar
+    document.getElementById('vidProgressWrap').style.display = 'none';
+    document.getElementById('vidLocalPreview').style.display = 'none';
+}
+
+
+// ── Scroll-to ──────────────────────────────────────────────────────────────
+{% if scroll_to %}
+setTimeout(() => {
+    const el = document.getElementById('{{ scroll_to }}');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 300);
+{% endif %}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CHART.JS CHARTS
+// ══════════════════════════════════════════════════════════════════════════
+Chart.defaults.color = '#566888';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+const ACCENT  = '#00d4ff';
+const PURPLE  = '#7c3aed';
+const SUCCESS = '#00e676';
+const WARNING = '#ffa726';
+const DANGER  = '#ff4d6d';
+
+// Gradient helper
+function makeGradient(ctx, color, alpha1=0.3, alpha2=0) {
+    const g = ctx.createLinearGradient(0, 0, 0, 220);
+    const hex = color;
+    g.addColorStop(0,  hex.replace(')',`,${alpha1})`).replace('rgb','rgba'));
+    g.addColorStop(1,  hex.replace(')',`,${alpha2})`).replace('rgb','rgba'));
+    return g;
+}
+
+// ── 1. Traffic Line Chart ─────────────────────────────────────────────────
+(function () {
+    const canvas = document.getElementById('trafficChart');
+    const ctx    = canvas.getContext('2d');
+
+    const vGrad = ctx.createLinearGradient(0, 0, 0, 220);
+    vGrad.addColorStop(0, 'rgba(0,212,255,0.3)');
+    vGrad.addColorStop(1, 'rgba(0,212,255,0)');
+
+    const pGrad = ctx.createLinearGradient(0, 0, 0, 220);
+    pGrad.addColorStop(0, 'rgba(124,58,237,0.25)');
+    pGrad.addColorStop(1, 'rgba(124,58,237,0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['06 AM','07 AM','08 AM','09 AM','10 AM','11 AM','12 PM','01 PM','02 PM','03 PM','04 PM','05 PM'],
+            datasets: [
+                {
+                    label: 'Vehicles',
+                    data: [18, 35, 62, 88, 74, 92, 110, 98, 85, 70, 95, 120],
+                    borderColor: ACCENT,
+                    backgroundColor: vGrad,
+                    borderWidth: 2.5,
+                    tension: 0.45,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: ACCENT,
+                    pointBorderColor: '#060b18',
+                    pointBorderWidth: 2,
+                },
+                {
+                    label: 'Pedestrians',
+                    data: [5, 12, 22, 30, 26, 35, 42, 38, 28, 22, 30, 38],
+                    borderColor: PURPLE,
+                    backgroundColor: pGrad,
+                    borderWidth: 2,
+                    tension: 0.45,
+                    fill: true,
+                    pointRadius: 3,
+                    pointBackgroundColor: PURPLE,
+                    pointBorderColor: '#060b18',
+                    pointBorderWidth: 2,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    labels: { color: '#8ca0c0', font: { size: 12, weight: '500' }, padding: 20, boxWidth: 12 }
+                },
+                tooltip: {
+                    backgroundColor: '#111e33',
+                    borderColor: 'rgba(0,212,255,0.2)',
+                    borderWidth: 1,
+                    padding: 12,
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 12 },
+                    titleColor: '#e8f0fe',
+                    bodyColor: '#8ca0c0',
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#566888', font: { size: 11 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' }
+                },
+                y: {
+                    ticks: { color: '#566888', font: { size: 11 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    beginAtZero: true,
+                }
+            }
+        }
+    });
+})();
+
+// ── 2. Pie / Donut Chart ──────────────────────────────────────────────────
+(function () {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Cars', 'Trucks', 'Motorcycles', 'Buses', 'Pedestrians', 'Other'],
+            datasets: [{
+                data: [45, 15, 20, 8, 25, 7],
+                backgroundColor: ['#00d4ff','#7c3aed','#00e676','#ffa726','#ff4d6d','#40c4ff'],
+                borderColor: '#0d1526',
+                borderWidth: 3,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#8ca0c0', font: { size: 11 }, padding: 10, boxWidth: 10, usePointStyle: true }
+                },
+                tooltip: {
+                    backgroundColor: '#111e33',
+                    borderColor: 'rgba(0,212,255,0.2)',
+                    borderWidth: 1,
+                    padding: 10,
+                    titleFont: { size: 12 },
+                    bodyFont: { size: 12 },
+                    titleColor: '#e8f0fe',
+                    bodyColor: '#8ca0c0',
+                }
+            }
+        }
+    });
+})();
+
+// ── 3. Risk Chart (bar) ───────────────────────────────────────────────────
+(function () {
+    const ctx = document.getElementById('riskChart').getContext('2d');
+    const riskScores = [12, 28, 45, 38, 62, 80, 55, 42, 58, 35, 48, 72];
+    const colors = riskScores.map(v =>
+        v >= 60 ? 'rgba(255,77,109,0.7)' : v >= 35 ? 'rgba(255,167,38,0.7)' : 'rgba(0,230,118,0.7)'
+    );
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['06','07','08','09','10','11','12','13','14','15','16','17'],
+            datasets: [{
+                label: 'Risk Score',
+                data: riskScores,
+                backgroundColor: colors,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#111e33',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    padding: 10,
+                    titleFont: { size: 11 },
+                    bodyFont: { size: 11 },
+                    titleColor: '#e8f0fe',
+                    bodyColor: '#8ca0c0',
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#566888', font: { size: 10 } }, grid: { display: false } },
+                y: { ticks: { color: '#566888', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, max: 100 }
+            }
+        }
+    });
+})();
+
+// ── 4. Performance Chart ───────────────────────────────────────────────────
+(function () {
+    const ctx = document.getElementById('perfChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['t-10','t-9','t-8','t-7','t-6','t-5','t-4','t-3','t-2','t-1','now'],
+            datasets: [
+                {
+                    label: 'FPS',
+                    data: [52, 48, 55, 42, 58, 60, 45, 52, 49, 56, 54],
+                    borderColor: SUCCESS,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    fill: false,
+                },
+                {
+                    label: 'Accuracy %',
+                    data: [96, 95, 97, 94, 98, 97, 95, 96, 95, 97, 96],
+                    borderColor: WARNING,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#8ca0c0', font: { size: 11 }, boxWidth: 10 } },
+                tooltip: { backgroundColor: '#111e33', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, padding: 10, titleFont: { size: 11 }, bodyFont: { size: 11 }, titleColor: '#e8f0fe', bodyColor: '#8ca0c0' }
+            },
+            scales: {
+                x: { ticks: { color: '#566888', font: { size: 10 } }, grid: { display: false } },
+                y: { ticks: { color: '#566888', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            }
+        }
+    });
+})();
+
+// ── 5. Vehicle Type Stacked Bar ────────────────────────────────────────────
+(function () {
+    const ctx = document.getElementById('typeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+            datasets: [
+                { label: 'Cars',       data: [120,145,135,160,180,200,170], backgroundColor: 'rgba(0,212,255,0.7)',   borderRadius: 2 },
+                { label: 'Trucks',     data: [40,35,45,50,60,30,25],        backgroundColor: 'rgba(124,58,237,0.7)',  borderRadius: 2 },
+                { label: 'Motorcycles',data: [65,70,60,80,90,110,95],       backgroundColor: 'rgba(0,230,118,0.7)',   borderRadius: 2 },
+                { label: 'Buses',      data: [20,18,22,25,28,15,12],        backgroundColor: 'rgba(255,167,38,0.7)',  borderRadius: 2 },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#8ca0c0', font: { size: 10 }, boxWidth: 8, padding: 8 } },
+                tooltip: { backgroundColor: '#111e33', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, padding: 10, titleFont: { size: 11 }, bodyFont: { size: 11 }, titleColor: '#e8f0fe', bodyColor: '#8ca0c0' }
+            },
+            scales: {
+                x: { stacked: true, ticks: { color: '#566888', font: { size: 10 } }, grid: { display: false } },
+                y: { stacked: true, ticks: { color: '#566888', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            }
+        }
+    });
+})();
+
+// ── 6. Video Frame Chart (if available) ───────────────────────────────────
+{% if chart_data %}
+(function () {
+    const frameData = {{ chart_data|safe }};
+    const labels  = frameData.map(f => 'F' + f.frame);
+    const vehicles = frameData.map(f => f.vehicles);
+    const peds     = frameData.map(f => f.pedestrians);
+    const ctx = document.getElementById('videoFrameChart').getContext('2d');
+
+    const vGrad = ctx.createLinearGradient(0, 0, 0, 200);
+    vGrad.addColorStop(0, 'rgba(0,212,255,0.3)');
+    vGrad.addColorStop(1, 'rgba(0,212,255,0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Vehicles',
+                    data: vehicles,
+                    borderColor: ACCENT,
+                    backgroundColor: vGrad,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0,
+                },
+                {
+                    label: 'Pedestrians',
+                    data: peds,
+                    borderColor: PURPLE,
+                    backgroundColor: 'rgba(124,58,237,0.08)',
+                    borderWidth: 1.5,
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#8ca0c0', font: { size: 12 }, boxWidth: 10 } },
+                tooltip: { backgroundColor: '#111e33', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, padding: 10, titleFont: { size: 11 }, bodyFont: { size: 11 }, titleColor: '#e8f0fe', bodyColor: '#8ca0c0' }
+            },
+            scales: {
+                x: { ticks: { color: '#566888', font: { size: 10 }, maxTicksLimit: 10 }, grid: { display: false } },
+                y: { ticks: { color: '#566888', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true }
+            }
+        }
+    });
+})();
+{% endif %}
+
+// ══════════════════════════════════════════════════════════════════════════
+// LIVE CAMERA + REAL-TIME MINI CHART
+// ══════════════════════════════════════════════════════════════════════════
+let cameraRunning = false;
+let liveChartObj = null;
+let liveChartData = { v: [], p: [], labels: [] };
+let statsInterval = null;
+
+// Mini live chart init
+(function () {
+    const ctx = document.getElementById('liveChart').getContext('2d');
+    liveChartObj = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'V', data: [], borderColor: ACCENT, borderWidth: 1.5, fill: false, tension: 0.4, pointRadius: 0 },
+                { label: 'P', data: [], borderColor: PURPLE, borderWidth: 1.5, fill: false, tension: 0.4, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 300 },
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: {
+                x: { display: false },
+                y: { display: false, beginAtZero: true }
+            }
+        }
+    });
+})();
+
+async function startCamera() {
+    if (cameraRunning) return;
+
+    const res = await fetch('/start_camera', { method: 'POST' });
+    if (!res.ok) { alert('Could not start camera.'); return; }
+    cameraRunning = true;
+
+    document.getElementById('camera-feed').src = '/video_feed?' + Date.now();
+    document.getElementById('cameraContainer').style.display = 'block';
+    document.getElementById('cameraHint').style.display       = 'none';
+    document.getElementById('cameraStatus').textContent       = '● Live';
+    document.getElementById('cameraStatus').className         = 'camera-status status-live';
+    document.getElementById('btnStart').disabled              = true;
+    document.getElementById('btnStop').disabled               = false;
+
+    // Poll live stats every 2s
+    statsInterval = setInterval(fetchLiveStats, 2000);
+}
+
+async function stopCamera() {
+    if (!cameraRunning) return;
+    clearInterval(statsInterval);
+
+    const feed = document.getElementById('camera-feed');
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = feed.naturalWidth  || 640;
+        canvas.height = feed.naturalHeight || 480;
+        canvas.getContext('2d').drawImage(feed, 0, 0);
+        const frozen = canvas.toDataURL('image/jpeg');
+        await fetch('/stop_camera', { method: 'POST' });
+        cameraRunning = false;
+        feed.src = frozen;
+        document.getElementById('cameraContainer').style.display = 'block';
+        document.getElementById('cameraContainer').querySelector('.camera-overlay').innerHTML = '<span class="paused-badge">⏸ PAUSED</span>';
+        document.getElementById('scanLine').style.display = 'none';
+    } catch(e) {
+        await fetch('/stop_camera', { method: 'POST' });
+        cameraRunning = false;
+        document.getElementById('cameraContainer').style.display = 'none';
+        document.getElementById('cameraHint').style.display = 'block';
+    }
+
+    document.getElementById('cameraStatus').textContent = '● Paused';
+    document.getElementById('cameraStatus').className   = 'camera-status status-paused';
+    document.getElementById('btnStart').disabled        = false;
+    document.getElementById('btnStop').disabled         = true;
+}
+
+async function fetchLiveStats() {
+    try {
+        const res  = await fetch('/api/live_stats');
+        const data = await res.json();
+        const hist = data.history;
+        if (!hist.length) return;
+
+        const last = hist[hist.length - 1];
+        document.getElementById('liveVehicles').textContent    = last.v;
+        document.getElementById('livePedestrians').textContent = last.p;
+        document.getElementById('liveRisk').textContent        = last.risk;
+        document.getElementById('liveFrames').textContent      = data.session.total_frames;
+
+        // Update mini chart
+        const MAX = 20;
+        liveChartObj.data.labels    = hist.map((_, i) => i);
+        liveChartObj.data.datasets[0].data = hist.map(h => h.v);
+        liveChartObj.data.datasets[1].data = hist.map(h => h.p);
+        liveChartObj.update('none');
+
+        // Update stat cards
+        document.getElementById('statVehicles').textContent    = data.session.total_vehicles;
+        document.getElementById('statPedestrians').textContent = data.session.total_pedestrians;
+    } catch(e) { /* ignore */ }
+}
+
+async function resetSession() {
+    await fetch('/api/session_reset', { method: 'POST' });
+    document.getElementById('liveVehicles').textContent    = '—';
+    document.getElementById('livePedestrians').textContent = '—';
+    document.getElementById('liveRisk').textContent        = '—';
+    document.getElementById('liveFrames').textContent      = '—';
+    liveChartObj.data.labels = [];
+    liveChartObj.data.datasets[0].data = [];
+    liveChartObj.data.datasets[1].data = [];
+    liveChartObj.update();
+}
+</script>
+
+<!-- ══════════════ ACCIDENT ALERT SYSTEM ══════════════════════════════════ -->
+<style>
+/* ── Toast Alert Popup ─────────────────────────────────────────────────── */
+#accidentToast {
+    position: fixed;
+    top: 24px; right: 24px;
+    z-index: 9999;
+    max-width: 380px;
+    min-width: 300px;
+    background: #0d1117;
+    border: 1.5px solid #ff3b3b;
+    border-radius: 14px;
+    box-shadow: 0 0 40px rgba(255,59,59,0.45), 0 8px 32px rgba(0,0,0,0.6);
+    padding: 0;
+    transform: translateX(120%);
+    transition: transform .4s cubic-bezier(.175,.885,.32,1.275);
+    overflow: hidden;
+}
+#accidentToast.show { transform: translateX(0); }
+
+.toast-header {
+    background: linear-gradient(135deg, #ff3b3b, #ff6b00);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: .95rem;
+    color: #fff;
+    letter-spacing: .03em;
+}
+.toast-header .toast-icon { font-size: 1.3rem; animation: pulse-icon 1s infinite; }
+@keyframes pulse-icon { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+
+.toast-body { padding: 14px 16px; }
+.toast-body .toast-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin-bottom: 6px;
+}
+.toast-body .toast-desc {
+    font-size: .82rem;
+    color: #a0aec0;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+.toast-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.toast-badge {
+    font-size: .72rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: .04em;
+}
+.tbadge-red   { background: rgba(255,59,59,.15);  color: #ff6b6b;  border:1px solid rgba(255,59,59,.3); }
+.tbadge-orange{ background: rgba(255,107,0,.15);  color: #ffa040;  border:1px solid rgba(255,107,0,.3); }
+.tbadge-blue  { background: rgba(0,212,255,.1);   color: #00d4ff;  border:1px solid rgba(0,212,255,.25); }
+
+.toast-actions { padding: 0 16px 14px; display: flex; gap: 8px; }
+.toast-btn {
+    flex:1;
+    padding: 7px 0;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 600;
+    transition: opacity .2s;
+}
+.toast-btn:hover { opacity: .8; }
+.toast-btn-dismiss { background: rgba(255,255,255,.07); color: #a0aec0; }
+.toast-btn-view    { background: linear-gradient(135deg,#ff3b3b,#ff6b00); color: #fff; }
+
+/* ── Screen Flash ──────────────────────────────────────────────────────── */
+#screenFlash {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 30, 30, 0.18);
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+}
+#screenFlash.flash { animation: screen-flash-anim 1.2s ease forwards; }
+@keyframes screen-flash-anim {
+    0%   { opacity: .5; }
+    30%  { opacity: .0; }
+    50%  { opacity: .4; }
+    70%  { opacity: .0; }
+    85%  { opacity: .25; }
+    100% { opacity: .0; }
+}
+
+/* ── Alert feed entry ──────────────────────────────────────────────────── */
+.alert-feed-entry {
+    animation: slide-in-alert .4s ease;
+}
+@keyframes slide-in-alert {
+    from { opacity:0; transform: translateX(-20px); }
+    to   { opacity:1; transform: translateX(0); }
+}
+</style>
+
+<!-- Screen flash overlay -->
+<div id="screenFlash"></div>
+
+<!-- Toast popup -->
+<div id="accidentToast">
+    <div class="toast-header">
+        <span class="toast-icon">🚨</span>
+        <span id="toastHeadText">ACCIDENT RISK DETECTED</span>
+        <span style="margin-left:auto;font-size:.75rem;opacity:.7" id="toastTime"></span>
+    </div>
+    <div class="toast-body">
+        <div class="toast-title" id="toastTitle">High Risk Situation</div>
+        <div class="toast-desc" id="toastDesc">Multiple vehicles and pedestrians detected in a high-risk zone.</div>
+        <div class="toast-meta" id="toastMeta"></div>
+    </div>
+    <div class="toast-actions">
+        <button class="toast-btn toast-btn-dismiss" onclick="dismissToast()">Dismiss</button>
+        <button class="toast-btn toast-btn-view" onclick="viewAlerts()">View Alerts</button>
+    </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+//  ACCIDENT / RISK ALERT SYSTEM
+// ══════════════════════════════════════════════════════════════════════════
+
+// Config
+const ALERT_CFG = {
+    sound:       true,   // beep/siren sound
+    browserNotif: true,  // OS notification
+    flashScreen: true,   // red screen flash
+    cooldown:    8000,   // ms between repeated alerts (same source)
+};
+
+let _lastAlertTime = {};
+let _toastTimer    = null;
+var _AC = null;
+
+function _getAC() {
+    if (!_AC) _AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (_AC.state === 'suspended') _AC.resume();
+    return _AC;
+}
+
+function enableSoundSystem() {
+    try {
+        var ctx = _getAC();
+        _t(ctx,'sine',520,0.0,0.25,0.3);
+        _t(ctx,'sine',660,0.2,0.25,0.3);
+        _t(ctx,'sine',800,0.4,0.25,0.3);
+        var btn = document.getElementById('soundEnableBtn');
+        if (btn) { btn.textContent='🔊 ALERTS ON'; btn.style.background='linear-gradient(135deg,#00c851,#00e676)'; btn.style.animation='none'; btn.disabled=true; }
+    } catch(e) {}
+}
+
+function unlockAudio() {}
+
+function _t(ctx, type, freq, delay, dur, vol) {
+    try {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = type; o.frequency.value = freq;
+        var t = ctx.currentTime + delay + 0.01;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.start(t); o.stop(t + dur + 0.05);
+    } catch(e) {}
+}
+
+function playAlertSound(level, alertType) {
+    try {
+        var ctx = _getAC();
+        if (alertType === 'HIGH_RISK' || level === 'HIGH') {
+            _t(ctx,'sawtooth',1000,0.00,0.25,0.6); _t(ctx,'sawtooth',600,0.30,0.25,0.6);
+            _t(ctx,'sawtooth',1000,0.60,0.25,0.6); _t(ctx,'sawtooth',600,0.90,0.25,0.6);
+        } else if (alertType === 'PEDESTRIAN') {
+            _t(ctx,'sine',880,0.00,0.18,0.5); _t(ctx,'sine',880,0.25,0.18,0.5); _t(ctx,'sine',880,0.50,0.18,0.5);
+        } else if (alertType === 'CONGESTION') {
+            _t(ctx,'triangle',300,0.0,0.5,0.6); _t(ctx,'triangle',300,0.7,0.5,0.6);
+        } else if (alertType === 'SYSTEM_OK') {
+            _t(ctx,'sine',520,0.0,0.25,0.3); _t(ctx,'sine',660,0.2,0.25,0.3); _t(ctx,'sine',800,0.4,0.25,0.3);
+        } else {
+            _t(ctx,'square',700,0.0,0.22,0.4); _t(ctx,'square',700,0.3,0.22,0.4);
+        }
+    } catch(e) {}
+}
+
+// ── Browser Notification ───────────────────────────────────────────────────
+function sendBrowserNotif(title, body) {
+    if (!ALERT_CFG.browserNotif) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/static/favicon.ico', tag: 'autovision-alert' });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(p => {
+            if (p === 'granted') new Notification(title, { body, tag: 'autovision-alert' });
+        });
+    }
+}
+
+// ── Screen Flash ───────────────────────────────────────────────────────────
+function triggerScreenFlash() {
+    if (!ALERT_CFG.flashScreen) return;
+    const el = document.getElementById('screenFlash');
+    el.classList.remove('flash');
+    void el.offsetWidth; // reflow
+    el.classList.add('flash');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(opts) {
+    // opts: { level, source, vehicles, pedestrians, traffic, desc }
+    const toast = document.getElementById('accidentToast');
+
+    document.getElementById('toastTime').textContent = new Date().toLocaleTimeString('en-IN', {hour12:false});
+
+    if (opts.level === 'HIGH') {
+        toast.style.borderColor = '#ff3b3b';
+        toast.querySelector('.toast-header').style.background = 'linear-gradient(135deg,#ff3b3b,#ff6b00)';
+        document.getElementById('toastHeadText').textContent = '🚨 ACCIDENT RISK DETECTED';
+        document.getElementById('toastTitle').textContent    = 'High Risk — Possible Accident Zone';
+        document.getElementById('toastTitle').style.color   = '#ff6b6b';
+    } else {
+        toast.style.borderColor = '#ffa040';
+        toast.querySelector('.toast-header').style.background = 'linear-gradient(135deg,#ffa040,#ffcc00)';
+        document.getElementById('toastHeadText').textContent = '⚠️ MEDIUM RISK ALERT';
+        document.getElementById('toastTitle').textContent    = 'Caution — Elevated Risk Detected';
+        document.getElementById('toastTitle').style.color   = '#ffa040';
+    }
+
+    document.getElementById('toastDesc').textContent = opts.desc;
+
+    const meta = document.getElementById('toastMeta');
+    meta.innerHTML = `
+        <span class="toast-badge tbadge-red">Risk: ${opts.level}</span>
+        <span class="toast-badge tbadge-orange">🚗 ${opts.vehicles} Vehicles</span>
+        <span class="toast-badge tbadge-blue">🚶 ${opts.pedestrians} Pedestrians</span>
+        <span class="toast-badge tbadge-orange">Source: ${opts.source}</span>`;
+
+    toast.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => toast.classList.remove('show'), opts.level === 'HIGH' ? 12000 : 8000);
+}
+
+function dismissToast() {
+    document.getElementById('accidentToast').classList.remove('show');
+    clearTimeout(_toastTimer);
+}
+
+function viewAlerts() {
+    dismissToast();
+    const el = document.getElementById('alerts');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Inject into Live Alert Feed ────────────────────────────────────────────
+function injectAlertFeed(level, source, vehicles, pedestrians) {
+    const list = document.querySelector('.alert-list');
+    if (!list) return;
+
+    const now = new Date().toLocaleTimeString('en-IN', {hour12:false});
+    const isHigh = level === 'HIGH';
+
+    const div = document.createElement('div');
+    div.className = `alert-box ${isHigh ? 'alert-danger' : 'alert-warning'} alert-feed-entry`;
+    div.innerHTML = `
+        <span class="alert-icon">${isHigh ? '🚨' : '⚠️'}</span>
+        <div>
+            <strong>${isHigh ? 'Accident Risk Detected' : 'Elevated Risk Warning'}</strong>
+            <p>${isHigh
+                ? `${vehicles} vehicles + ${pedestrians} pedestrians — high collision probability. Source: ${source}.`
+                : `${vehicles} vehicles near pedestrian zone. Exercise caution. Source: ${source}.`
+            }</p>
+        </div>
+        <span class="alert-time">${now}</span>`;
+
+    list.insertBefore(div, list.firstChild);
+
+    // Update badge count
+    const badge = document.querySelector('.alert-count');
+    if (badge) {
+        const cur = parseInt(badge.textContent) || 0;
+        badge.textContent = (cur + 1) + ' Active';
+    }
+}
+
+// ── Test all 4 sounds sequentially ────────────────────────────────────────
+function testAllAlertSounds() {
+    if (!_AC) { alert('Pehle "ENABLE ALERTS" button click karo!'); return; }
+    playAlertSound('HIGH',   'HIGH_RISK');
+    setTimeout(() => playAlertSound('MEDIUM', 'PEDESTRIAN'),  2000);
+    setTimeout(() => playAlertSound('MEDIUM', 'CONGESTION'),  3800);
+    setTimeout(() => playAlertSound('OK',     'SYSTEM_OK'),   5500);
+}
+// Maps detection context → alertType for distinct sounds per image scenario
+function detectAlertType(opts) {
+    if (opts.alertType) return opts.alertType; // explicit override
+    const v = opts.vehicles   || 0;
+    const p = opts.pedestrians || 0;
+    const traffic = (opts.traffic || '').toUpperCase();
+
+    if (opts.level === 'HIGH' && (v > 0 || p > 0)) return 'HIGH_RISK';   // 🚨 lane violation / accident zone
+    if (p > 0 && opts.level !== 'HIGH')             return 'PEDESTRIAN';  // ⚠️ pedestrian near crossing
+    if (traffic === 'HEAVY' || v >= 6)              return 'CONGESTION';  // 🚗 heavy traffic congestion
+    if (opts.level === 'OK' || opts.level === 'LOW') return 'SYSTEM_OK';  // ✅ all systems operational
+    return opts.level; // fallback to level-based sound
+}
+
+// ── Master Trigger ─────────────────────────────────────────────────────────
+function triggerAlert(opts) {
+    // opts: { level:'HIGH'|'MEDIUM'|'LOW'|'OK', source, vehicles, pedestrians, traffic, alertType? }
+    const key = opts.source || 'default';
+    const now = Date.now();
+
+    if (_lastAlertTime[key] && now - _lastAlertTime[key] < ALERT_CFG.cooldown) return;
+    _lastAlertTime[key] = now;
+
+    const resolvedType = detectAlertType(opts);
+
+    const desc = opts.level === 'HIGH'
+        ? `Accident risk zone detected! ${opts.vehicles} vehicles and ${opts.pedestrians} pedestrians in conflict area — immediate attention required.`
+        : resolvedType === 'PEDESTRIAN'
+            ? `Pedestrian detected within high-risk crossing area — reduce speed advised.`
+            : resolvedType === 'CONGESTION'
+                ? `Dense vehicle clustering on segment — recommend rerouting.`
+                : `Risk elevated near crossing. ${opts.vehicles} vehicles detected close to ${opts.pedestrians} pedestrians.`;
+
+    // 1) Screen flash (only for HIGH and PEDESTRIAN risk)
+    if (opts.level === 'HIGH' || resolvedType === 'PEDESTRIAN') triggerScreenFlash();
+
+    // 2) Sound — distinct per alert type
+    if (ALERT_CFG.sound) playAlertSound(opts.level, resolvedType);
+
+    // 3) Toast popup
+    showToast({ ...opts, desc });
+
+    // 4) Browser notification (for tab in background)
+    sendBrowserNotif(
+        resolvedType === 'HIGH_RISK'   ? '🚨 AutoVision: High-Risk Movement Detected!'  :
+        resolvedType === 'PEDESTRIAN'  ? '⚠️ AutoVision: Pedestrian Near Crossing Zone!'  :
+        resolvedType === 'CONGESTION'  ? '🚗 AutoVision: Heavy Traffic Congestion!'        :
+        resolvedType === 'SYSTEM_OK'   ? '✅ AutoVision: All Detection Modules Operational' :
+                                         '⚠️ AutoVision: Medium Risk Alert',
+        desc
+    );
+
+    // 5) Inject into alert feed
+    injectAlertFeed(opts.level, opts.source, opts.vehicles, opts.pedestrians);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  HOOK INTO EXISTING SOURCES
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 1. LIVE CAMERA — direct hook (safe, runs after fetchLiveStats is defined)
+//    Uses a flag so we don't double-patch
+function _hookLiveCameraAlerts() {
+    if (window._liveAlertHooked) return;
+    window._liveAlertHooked = true;
+    const orig = window.fetchLiveStats;
+    if (typeof orig !== 'function') return;
+    window.fetchLiveStats = async function() {
+        await orig.apply(this, arguments);
+        try {
+            const res  = await fetch('/api/live_stats');
+            const data = await res.json();
+            const hist = data.history;
+            if (!hist || !hist.length) return;
+            const last = hist[hist.length - 1];
+            const trafficLevel = (last.v >= 6) ? 'HEAVY' : (last.v >= 3 ? 'MEDIUM' : 'LOW');
+            if (last.risk === 'HIGH' || last.risk === 'MEDIUM' || last.v >= 6) {
+                triggerAlert({
+                    level: last.risk || (last.v >= 6 ? 'MEDIUM' : 'LOW'),
+                    source: 'Camera',
+                    vehicles: last.v,
+                    pedestrians: last.p,
+                    traffic: trafficLevel
+                });
+            }
+        } catch(e) {}
+    };
+}
+// Hook after DOM is fully ready so fetchLiveStats is guaranteed defined
+document.addEventListener('DOMContentLoaded', _hookLiveCameraAlerts);
+setTimeout(_hookLiveCameraAlerts, 500); // safety fallback
+
+// ── 2. IMAGE — check on page load if image result with HIGH/MEDIUM risk ───
+(function checkImageAlert() {
+    const riskEl = document.querySelector('.stat-card .stat-value[style*="font-size:20px"]');
+    const imageResult = document.querySelector('img.result-image, .result-wrap img');
+    if (!imageResult) return; // no image result on this page load
+    const risk = riskEl ? riskEl.textContent.trim() : '';
+    if (risk === 'HIGH' || risk === 'MEDIUM') {
+        // Read vehicles/pedestrians from page
+        const vEl = document.getElementById('statVehicles');
+        const pEl = document.getElementById('statPedestrians');
+        const v = vEl ? parseInt(vEl.textContent) || 0 : 0;
+        const p = pEl ? parseInt(pEl.textContent) || 0 : 0;
+        setTimeout(() => triggerAlert({ level: risk, source: 'Image', vehicles: v, pedestrians: p }), 1000);
+    }
+})();
+
+// ── 3. VIDEO — patch showVideoResult ─────────────────────────────────────
+const _origShowVideoResult = window.showVideoResult;
+window.showVideoResult = function(job) {
+    _origShowVideoResult.apply(this, arguments);
+    const va = job.video_analytics || {};
+    const risk = va.risk || '';
+    if (risk === 'HIGH' || risk === 'MEDIUM') {
+        setTimeout(() => triggerAlert({
+            level: risk,
+            source: 'Video',
+            vehicles: va.vehicles || 0,
+            pedestrians: va.pedestrians || 0,
+            traffic: va.traffic || '—'
+        }), 800);
+    }
+};
+
+// ── Request notification permission on page load ──────────────────────────
+if ('Notification' in window && Notification.permission === 'default') {
+    setTimeout(() => Notification.requestPermission(), 2000);
+}
+</script>
+
+</body>
+</html>
